@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <time.h>
  
 // leftrotate function definition
 #define LEFTROTATE(x, c) (((x) << (c)) | ((x) >> (32 - (c))))
@@ -199,24 +200,37 @@ int mainold(int argc, char **argv) {
 }
 
 int main(int argc, char** argv) {
+  time_t rawtime;
+  time_t rawtime2;
+  struct tm * timeinfo;
+
+  time ( &rawtime );
+  timeinfo = localtime ( &rawtime );
+  printf ( "Started on: %s", asctime (timeinfo) );
+
   char str[256];
+  char hash[9];
+  char start[] = "abcdef";
+
   int i;
-  for (i = 0; i < 100; i=i+1){
-	printf("%s\"%d\"\n", "Hash of: ", i);
+  for (i = 0; ; i=i+1){
 	sprintf(str, "%d", i);
         size_t len = strlen(str);
         md5(str, len);
 	uint8_t *p;
 	p=(uint8_t *)&h0;
-    	printf("%2.2x%2.2x%2.2x%2.2x", p[0], p[1], p[2], p[3], h0);
-	p=(uint8_t *)&h1;
-    	printf("%2.2x%2.2x%2.2x%2.2x", p[0], p[1], p[2], p[3], h1);
-	p=(uint8_t *)&h2;
-    	printf("%2.2x%2.2x%2.2x%2.2x", p[0], p[1], p[2], p[3], h2);
-	p=(uint8_t *)&h3;
-    	printf("%2.2x%2.2x%2.2x%2.2x", p[0], p[1], p[2], p[3], h3);
-    	puts("");
-}
+    	sprintf(hash, "%2.2x%2.2x%2.2x%2.2x", p[0], p[1], p[2], p[3], h0);
+        if(strncmp(start, hash, 6) == 0) {
+	  break;
+	  hash[8] = 0;
+        }
+  }
+
+  printf("The hash of %d starts with abcdef: %s...\n", i, hash);
+  time ( &rawtime2 );
+  timeinfo = localtime ( &rawtime2 );
+  printf ( "Done on: %s", asctime (timeinfo) );
+  printf ( "Time: %d", rawtime2 - rawtime );
 
   return 0;
 }
